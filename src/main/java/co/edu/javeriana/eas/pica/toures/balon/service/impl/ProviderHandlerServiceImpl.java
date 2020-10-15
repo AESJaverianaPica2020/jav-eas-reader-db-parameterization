@@ -7,6 +7,7 @@ import co.edu.javeriana.eas.pica.toures.balon.service.IProviderHandlerService;
 import co.edu.javeriana.eas.pica.toures.balon.service.IProviderReaderService;
 import co.edu.javeriana.eas.pica.toures.balon.utilities.JsonUtility;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,23 +37,25 @@ public class ProviderHandlerServiceImpl implements IProviderHandlerService {
             LOGGER.info("INICIA PROCESO DE RECUPERACIÓN DE DATOS DE PROVEEDORES - CATALOGOS -");
             String providerType = getProviderTypeFromMessage(message);
             JsonNode providersSettings = providerReaderService.findProvidersByType(providerType);
+            ((ObjectNode) providersSettings.get("settings")).remove("response");
+            ((ObjectNode) providersSettings).set("parameters", message.get("Parametros"));
             JsonNode catalogProviders = sendToTransformAndGetCatalog(providersSettings);
             kafkaSenderService.sendMessage(catalogProviders);
             LOGGER.info("INICIA PROCESO DE RECUPERACIÓN DE DATOS DE PROVEEDORES - FINALIZA -");
         } catch (AbsProviderReaderException ex) {
-
+            LOGGER.error("ERROR EN RECUPERACIÓN DE CATALOGOS DE PROVEEDORES.");
         }
     }
 
     private String getProviderTypeFromMessage(JsonNode message) {
         LOGGER.info("inicia busqueda de tipo de proveedor por mensaje kafka");
-        String providerType = message.get("providerType").asText();
+        String providerType = message.get("Tipo_proveedor").asText();
         LOGGER.info("finaliza busqueda de tipo de proveedor por mensaje kafka. [TIPO:{}]", providerType);
         return providerType;
     }
 
     private JsonNode sendToTransformAndGetCatalog(JsonNode payload) throws ProviderConnectionException {
-        LOGGER.info("inicia integración con transformador para obtener catalogos de proveedores.");
+        LOGGER.info("inicia integración con transformador para obtener catalogos de proveedores [DATOS:{}]", JsonUtility.getPlainJson(payload));
         UriComponentsBuilder urlBuilder = UriComponentsBuilder.fromUriString(endpoint).path(path);
         URI uri = urlBuilder.build().encode().toUri();
         try {
