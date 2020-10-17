@@ -16,8 +16,8 @@ public class KafkaListenersService {
 
     private IProviderHandlerService providerHandlerService;
 
-    @KafkaListener(topics = "topic-info-reader")
-    public void listenerCatalog(JsonNode data) {
+    @KafkaListener(topics = "topic-test", groupId = "myGroup")
+    public void listenerCatalog(String data) {
         LOGGER.info("INICIA PROCESO DE INTEGRACIÓN CON PROVEEDORES POR MENSAJE RECIBIDO [{}]", JsonUtility.getPlainJson(data));
         providerHandlerService.runProcessGetCatalog(data);
         LOGGER.info("FINALIZA PROCESO DE INTEGRACIÓN CON PROVEEDORES POR MENSAJE RECIBIDO");

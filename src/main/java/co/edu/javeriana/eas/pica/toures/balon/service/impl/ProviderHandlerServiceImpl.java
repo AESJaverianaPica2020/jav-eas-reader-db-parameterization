@@ -6,7 +6,9 @@ import co.edu.javeriana.eas.pica.toures.balon.exceptions.impl.ProviderConnection
 import co.edu.javeriana.eas.pica.toures.balon.service.IProviderHandlerService;
 import co.edu.javeriana.eas.pica.toures.balon.service.IProviderReaderService;
 import co.edu.javeriana.eas.pica.toures.balon.utilities.JsonUtility;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,19 +34,28 @@ public class ProviderHandlerServiceImpl implements IProviderHandlerService {
     private RestTemplate restTemplate;
 
     @Override
-    public void runProcessGetCatalog(JsonNode message) {
+    public void runProcessGetCatalog(String message) {
         try {
             LOGGER.info("INICIA PROCESO DE RECUPERACIÓN DE DATOS DE PROVEEDORES - CATALOGOS -");
-            String providerType = getProviderTypeFromMessage(message);
+            JsonNode serializeMessage = getMessageInFormatJson(message);
+            String providerType = getProviderTypeFromMessage(serializeMessage);
             JsonNode providersSettings = providerReaderService.findProvidersByType(providerType);
-            ((ObjectNode) providersSettings.get("settings")).remove("response");
-            ((ObjectNode) providersSettings).set("parameters", message.get("Parametros"));
+            // ((ObjectNode) providersSettings.get("settings")).remove("response");
+            //((ObjectNode) providersSettings).set("parameters", serializeMessage.get("Parametros"));
             JsonNode catalogProviders = sendToTransformAndGetCatalog(providersSettings);
             kafkaSenderService.sendMessage(catalogProviders);
             LOGGER.info("INICIA PROCESO DE RECUPERACIÓN DE DATOS DE PROVEEDORES - FINALIZA -");
-        } catch (AbsProviderReaderException ex) {
+        } catch (AbsProviderReaderException | JsonProcessingException ex) {
             LOGGER.error("ERROR EN RECUPERACIÓN DE CATALOGOS DE PROVEEDORES.");
         }
+    }
+
+    private JsonNode getMessageInFormatJson(String message) throws JsonProcessingException {
+        LOGGER.info("inicia transformación de mensaje de String a Json.");
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode serializeMessage = mapper.readTree(message);
+        LOGGER.info("finaliza transformación de mensaje de String a Json. [MESSAJE:{}]", JsonUtility.getPlainJson(serializeMessage));
+        return serializeMessage;
     }
 
     private String getProviderTypeFromMessage(JsonNode message) {

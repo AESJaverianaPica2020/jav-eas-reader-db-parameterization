@@ -1,6 +1,5 @@
 package co.edu.javeriana.eas.pica.toures.balon.models.documents;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,7 +15,7 @@ public class Provider implements Serializable {
     private String name;
     private String type;
     private String integrationType;
-    private Map<String, Object> parameters;
+    private Map<String, Object> settings;
 
     public String getName() {
         return name;
@@ -42,12 +41,11 @@ public class Provider implements Serializable {
         this.integrationType = integrationType;
     }
 
-    public Map<String, Object> getParameters() {
-        return parameters;
+    public Map<String, Object> getSettings() {
+        return settings;
     }
 
-    public void setParameters(Map<String, Object> parameters) {
-        this.parameters = parameters;
+    public void setSettings(Map<String, Object> settings) {
+        this.settings = settings;
     }
-
 }
