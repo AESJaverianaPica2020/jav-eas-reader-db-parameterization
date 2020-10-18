@@ -12,10 +12,19 @@ public class Provider implements Serializable {
     private static final long serialVersionUID = -7788619177798333712L;
 
     @Id
+    private String id;
     private String name;
     private String type;
     private String integrationType;
     private Map<String, Object> settings;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
