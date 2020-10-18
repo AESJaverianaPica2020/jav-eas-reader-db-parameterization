@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ProviderReaderServiceImpl implements IProviderReaderService {
@@ -29,10 +31,13 @@ public class ProviderReaderServiceImpl implements IProviderReaderService {
     public JsonNode findProvidersByType(String type) throws AbsProviderReaderException {
         LOGGER.info("INICIA CONSULTA DE PROVEEDORES POR TIPO DE SERVICIO.");
         try {
+            Map<String, JsonNode> providersSettings = new HashMap<>();
             List<Provider> providers = providerRepository.findProviderByType(type).orElseThrow(
                     () -> new ProviderNotFoundException(ProviderReaderExceptionCode.EMPTY_PROVIDER_RESULT));
             LOGGER.info("FINALIZA CONSULTA DE PROVEEDORES POR TIPO DE SERVICIO. [RESPUESTA:{}]", JsonUtility.getPlainJson(providers));
-            return new ObjectMapper().convertValue(providers, ArrayNode.class);
+            JsonNode settings = new ObjectMapper().convertValue(providers, ArrayNode.class);
+            providersSettings.put("providers", settings);
+            return new ObjectMapper().convertValue(providersSettings, JsonNode.class);
         } catch (ProviderNotFoundException ex) {
             LOGGER.info("NO SE ENCONTRO NINGUN RESULTADO DE PROVEEDORES POR TIPO DE SERVICIO.");
             throw ex;

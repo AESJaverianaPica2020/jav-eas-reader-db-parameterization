@@ -40,8 +40,7 @@ public class ProviderHandlerServiceImpl implements IProviderHandlerService {
             JsonNode serializeMessage = getMessageInFormatJson(message);
             String providerType = getProviderTypeFromMessage(serializeMessage);
             JsonNode providersSettings = providerReaderService.findProvidersByType(providerType);
-            // ((ObjectNode) providersSettings.get("settings")).remove("response");
-            //((ObjectNode) providersSettings).set("parameters", serializeMessage.get("Parametros"));
+            ((ObjectNode) providersSettings).set("parameters", serializeMessage.get("Parametros"));
             JsonNode catalogProviders = sendToTransformAndGetCatalog(providersSettings);
             kafkaSenderService.sendMessage(catalogProviders);
             LOGGER.info("INICIA PROCESO DE RECUPERACIÓN DE DATOS DE PROVEEDORES - FINALIZA -");
