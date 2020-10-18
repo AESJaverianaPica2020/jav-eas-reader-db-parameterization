@@ -15,7 +15,7 @@
                                    mongo`
         * Use un cliente de mongodb por ejemplo DataGrip y realice una nueva conexión, tenga en cuenta que las credenciales de acceso se enviaron como variables de entorno en 
           en el docker run de mongo. 
-        * Ejecute el script de registro inicial de proveedores, aqui.
+        * Ejecute el script de registro inicial de proveedores, [[AQUI](https://github.com/AESJaverianaPica2020/jav-eas-providers-data-model/blob/main/datos.txt)]
 * Instalación y configuración de kafka.
     * Descargue kafka usando el comando `brew install kafka` en terminal linux.
     * Inicie el zookeeper usando el comando `brew services start zookeeper`
