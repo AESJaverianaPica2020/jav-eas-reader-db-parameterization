@@ -43,3 +43,34 @@
                                      -e PATH_TRANSFORMER_TOURES=my/api/path/test \
                                      reader-params:0.1` las variables asignadas son a modo de ejemplo.
 * Si no usa docker, simplemente `Run` sobre JavEasReaderDbParameterizationApplication.class
+
+### Recurso:
+
+Para poder realizar el consumo del recurso que premite la conexión con los proveedores por base de datos tenga en cuenta:
+
+**PATH BASE:** /V1/Enterprise/providers
+* V1 -> Version Uno.
+* Enterprise -> Api de dominio empresarial
+* providers -> Dominio del api
+
+<table>
+    <tr>
+        <td>PATH</td>
+        <td>DESCRIPCIÓN</td>
+        <td>TIPO</td>
+        <td>VERBO</td>
+        <td>ESTRUCTURA DEL REQUEST</td>
+        <td>HTTP CODE OK</td>
+        <td>HTTP CODES FAILED</td>
+    </tr>
+    <tr>
+        <td>/{name}</td>
+        <td>Recibe el nombre del proveedor, para retornar la información de sus configuraciones</td>
+        <td>SINCRONA</td>
+        <td>GET</td>
+        <td>N/A</td>
+        <td>200 - OK -</td>
+        <td>
+            500 - INTERNAL_SERVER_ERROR - Error interno el ejecución de proceso <br>
+    </tr>
+</table>
