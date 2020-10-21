@@ -48,10 +48,10 @@ public class ProviderReaderServiceImpl implements IProviderReaderService {
     }
 
     @Override
-    public JsonNode findProviderByName(String name) throws AbsProviderReaderException {
+    public JsonNode findProviderByName(String name, String type) throws AbsProviderReaderException {
         LOGGER.info("INICIA CONSULTA DE PROVEEDOR POR NOMBRE.");
         try {
-            Provider provider = providerRepository.findProviderByName(name).orElseThrow(
+            Provider provider = providerRepository.findProviderByNameAndAndType(name, type).orElseThrow(
                     () -> new ProviderNotFoundException(ProviderReaderExceptionCode.EMPTY_PROVIDER_RESULT));
             LOGGER.info("FINALIZA CONSULTA DE PROVEEDOR POR NOMBRE. [RESPUESTA:{}]", JsonUtility.getPlainJson(provider));
             return new ObjectMapper().convertValue(provider, JsonNode.class);

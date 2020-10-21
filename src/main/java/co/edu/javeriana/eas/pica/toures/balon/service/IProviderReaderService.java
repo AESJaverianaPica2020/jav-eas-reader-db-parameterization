@@ -7,6 +7,6 @@ public interface IProviderReaderService {
 
     JsonNode findProvidersByType(String type) throws AbsProviderReaderException;
 
-    JsonNode findProviderByName(String name) throws AbsProviderReaderException;
+    JsonNode findProviderByName(String name, String type) throws AbsProviderReaderException;
 
 }

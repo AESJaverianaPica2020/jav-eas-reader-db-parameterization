@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
-
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/V1/Enterprise")
@@ -34,10 +33,10 @@ public class ProviderReaderController {
     }
 
     @GetMapping("providers/{name}")
-    public ResponseEntity<JsonNode> getProvidersByName(@PathVariable String name) {
+    public ResponseEntity<JsonNode> getProvidersByName(@PathVariable String name, @RequestHeader("X-Type") String type) {
         try {
             LOGGER.info("INICIA PROCESO DE BUSQUEDA DE PROVEEDORES POR NOMBRE");
-            JsonNode providers = providerReaderService.findProviderByName(name);
+            JsonNode providers = providerReaderService.findProviderByName(name, type);
             LOGGER.info("FINALIZA PROCESO DE BUSQUEDA DE PROVEEDORES POR NOMBRE");
             return new ResponseEntity<>(providers, HttpStatus.OK);
         } catch (AbsProviderReaderException ex) {

@@ -68,7 +68,8 @@ Para poder realizar el consumo del recurso que premite la conexión con los prov
         <td>Recibe el nombre del proveedor, para retornar la información de sus configuraciones</td>
         <td>SINCRONA</td>
         <td>GET</td>
-        <td>N/A</td>
+        <td>Headers: <br> 
+                        <strong>X-Type</strong> con el valor del tipo de proovedor</td>
         <td>200 - OK -</td>
         <td>
             500 - INTERNAL_SERVER_ERROR - Error interno el ejecución de proceso <br>
