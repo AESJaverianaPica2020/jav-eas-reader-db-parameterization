@@ -9,7 +9,7 @@
 * Instalación y datos de mongo.
     * Para este caso de muestra el proceso usando imagenes docker:
         * Ejecute en terminal `docker pull mongo` esto descarga la ultima versión.
-        * Ejecute en terminal ` docker run --  network toures-balon-network -d --name mongo -p 27017:27017 \
+        * Ejecute en terminal `docker run -d --name mongo1 -p 27017:27017 \
                                    -e MONGO_INITDB_ROOT_USERNAME=mongoadmin \
                                    -e MONGO_INITDB_ROOT_PASSWORD=secret \
                                    mongo`
