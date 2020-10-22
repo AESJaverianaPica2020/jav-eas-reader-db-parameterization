@@ -10,6 +10,6 @@ public interface IProviderRepository extends MongoRepository<Provider, String> {
 
     Optional<List<Provider>> findProviderByType(String type);
 
-    Optional<Provider> findProviderByNameAndAndType(String name, String type);
+    Optional<List<Provider>> findProviderByNameAndAndType(String name, String type);
 
 }

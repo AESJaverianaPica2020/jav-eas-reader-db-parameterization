@@ -26,6 +26,12 @@ public class ProviderHandlerServiceImpl implements IProviderHandlerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderHandlerServiceImpl.class);
 
+    private static final String RESERVE_TYPE = "reserve";
+
+    private enum EProcessType {
+        RESERVE, CATALOG;
+    }
+
     private String endpoint;
     private String path;
 
@@ -38,9 +44,17 @@ public class ProviderHandlerServiceImpl implements IProviderHandlerService {
         try {
             LOGGER.info("INICIA PROCESO DE RECUPERACIÓN DE DATOS DE PROVEEDORES - CATALOGOS -");
             JsonNode serializeMessage = getMessageInFormatJson(message);
+            EProcessType processType = defineProcessType(serializeMessage);
             String providerType = getProviderTypeFromMessage(serializeMessage);
-            JsonNode providersSettings = providerReaderService.findProvidersByType(providerType);
+            JsonNode providersSettings;
+            if (processType == EProcessType.RESERVE) {
+                String providerName = serializeMessage.get("Nombre_proveedor").asText();
+                providersSettings = providerReaderService.findProviderByNameAndType(providerName, providerType);
+            } else {
+                providersSettings = providerReaderService.findProvidersByType(providerType);
+            }
             ((ObjectNode) providersSettings).set("parameters", serializeMessage.get("Parametros"));
+            ((ObjectNode) providersSettings).put("processType", processType.name());
             JsonNode catalogProviders = sendToTransformAndGetCatalog(providersSettings);
             kafkaSenderService.sendMessage(catalogProviders);
             LOGGER.info("INICIA PROCESO DE RECUPERACIÓN DE DATOS DE PROVEEDORES - FINALIZA -");
@@ -49,11 +63,19 @@ public class ProviderHandlerServiceImpl implements IProviderHandlerService {
         }
     }
 
+    private EProcessType defineProcessType(JsonNode message) {
+        LOGGER.info("inicia identificación de tipo de proceso a ejecutar");
+        String processTypeInput = message.get("Tipo_proceso").asText();
+        EProcessType processType = processTypeInput.equals(RESERVE_TYPE) ? EProcessType.RESERVE : EProcessType.CATALOG;
+        LOGGER.info("finaliza identificación de tipo de proceso a ejecutar [TIPO:{}]", processType);
+        return processType;
+    }
+
     private JsonNode getMessageInFormatJson(String message) throws JsonProcessingException {
         LOGGER.info("inicia transformación de mensaje de String a Json.");
         ObjectMapper mapper = new ObjectMapper();
         JsonNode serializeMessage = mapper.readTree(message);
-        LOGGER.info("finaliza transformación de mensaje de String a Json. [MESSAJE:{}]", JsonUtility.getPlainJson(serializeMessage));
+        LOGGER.info("finaliza transformación de mensaje de String a Json. [MESSAGE:{}]", JsonUtility.getPlainJson(serializeMessage));
         return serializeMessage;
     }
 

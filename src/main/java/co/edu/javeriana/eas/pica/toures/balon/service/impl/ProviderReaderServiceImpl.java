@@ -48,13 +48,16 @@ public class ProviderReaderServiceImpl implements IProviderReaderService {
     }
 
     @Override
-    public JsonNode findProviderByName(String name, String type) throws AbsProviderReaderException {
+    public JsonNode findProviderByNameAndType(String name, String type) throws AbsProviderReaderException {
         LOGGER.info("INICIA CONSULTA DE PROVEEDOR POR NOMBRE.");
         try {
-            Provider provider = providerRepository.findProviderByNameAndAndType(name, type).orElseThrow(
+            Map<String, JsonNode> providersSettings = new HashMap<>();
+            List<Provider> providers = providerRepository.findProviderByNameAndAndType(name, type).orElseThrow(
                     () -> new ProviderNotFoundException(ProviderReaderExceptionCode.EMPTY_PROVIDER_RESULT));
-            LOGGER.info("FINALIZA CONSULTA DE PROVEEDOR POR NOMBRE. [RESPUESTA:{}]", JsonUtility.getPlainJson(provider));
-            return new ObjectMapper().convertValue(provider, JsonNode.class);
+            LOGGER.info("FINALIZA CONSULTA DE PROVEEDOR POR NOMBRE. [RESPUESTA:{}]", JsonUtility.getPlainJson(providers));
+            JsonNode settings = new ObjectMapper().convertValue(providers, ArrayNode.class);
+            providersSettings.put("providers", settings);
+            return new ObjectMapper().convertValue(providersSettings, JsonNode.class);
         } catch (ProviderNotFoundException ex) {
             LOGGER.info("NO SE ENCONTROPROVEEDOR POR NOMBRE.");
             throw ex;

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/V1/Enterprise")
 public class ProviderReaderController {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ProviderReaderController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProviderReaderController.class);
 
     private IProviderReaderService providerReaderService;
 
@@ -36,7 +36,7 @@ public class ProviderReaderController {
     public ResponseEntity<JsonNode> getProvidersByName(@PathVariable String name, @RequestHeader("X-Type") String type) {
         try {
             LOGGER.info("INICIA PROCESO DE BUSQUEDA DE PROVEEDORES POR NOMBRE");
-            JsonNode providers = providerReaderService.findProviderByName(name, type);
+            JsonNode providers = providerReaderService.findProviderByNameAndType(name, type);
             LOGGER.info("FINALIZA PROCESO DE BUSQUEDA DE PROVEEDORES POR NOMBRE");
             return new ResponseEntity<>(providers, HttpStatus.OK);
         } catch (AbsProviderReaderException ex) {
