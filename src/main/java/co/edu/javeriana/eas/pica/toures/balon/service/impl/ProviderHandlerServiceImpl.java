@@ -55,10 +55,12 @@ public class ProviderHandlerServiceImpl implements IProviderHandlerService {
             }
             ((ObjectNode) providersSettings).set("parameters", serializeMessage.get("Parametros"));
             ((ObjectNode) providersSettings).put("processType", processType.name());
+            ((ObjectNode) providersSettings).put("Uuid", serializeMessage.get("Uuid").asText());
             JsonNode catalogProviders = sendToTransformAndGetCatalog(providersSettings);
+            ((ObjectNode) catalogProviders).put("type", serializeMessage.get("Tipo_proveedor").asText());
             kafkaSenderService.sendMessage(catalogProviders);
             LOGGER.info("INICIA PROCESO DE RECUPERACIÓN DE DATOS DE PROVEEDORES - FINALIZA -");
-        } catch (AbsProviderReaderException | JsonProcessingException ex) {
+        } catch (AbsProviderReaderException | JsonProcessingException | NullPointerException ex) {
             LOGGER.error("ERROR EN RECUPERACIÓN DE CATALOGOS DE PROVEEDORES.");
         }
     }
