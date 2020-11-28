@@ -20,6 +20,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class ProviderHandlerServiceImpl implements IProviderHandlerService {
@@ -47,22 +49,42 @@ public class ProviderHandlerServiceImpl implements IProviderHandlerService {
             EProcessType processType = defineProcessType(serializeMessage);
             String providerType = getProviderTypeFromMessage(serializeMessage);
             JsonNode providersSettings;
+            String uuid = serializeMessage.get("Uuid").asText();
             if (processType == EProcessType.RESERVE) {
                 String providerName = serializeMessage.get("Nombre_proveedor").asText();
                 providersSettings = providerReaderService.findProviderByNameAndType(providerName, providerType);
             } else {
                 providersSettings = providerReaderService.findProvidersByType(providerType);
+                sendTopicToRules(providersSettings, uuid);
             }
             ((ObjectNode) providersSettings).set("parameters", serializeMessage.get("Parametros"));
             ((ObjectNode) providersSettings).put("processType", processType.name());
-            ((ObjectNode) providersSettings).put("Uuid", serializeMessage.get("Uuid").asText());
+            ((ObjectNode) providersSettings).put("Uuid", uuid);
             JsonNode catalogProviders = sendToTransformAndGetCatalog(providersSettings);
             ((ObjectNode) catalogProviders).put("type", serializeMessage.get("Tipo_proveedor").asText());
-            kafkaSenderService.sendMessage(catalogProviders);
+            ((ObjectNode) catalogProviders).set("parameters", serializeMessage.get("Parametros"));
+            kafkaSenderService.sendMessage(catalogProviders, null);
             LOGGER.info("INICIA PROCESO DE RECUPERACIÓN DE DATOS DE PROVEEDORES - FINALIZA -");
         } catch (AbsProviderReaderException | JsonProcessingException | NullPointerException ex) {
-            LOGGER.error("ERROR EN RECUPERACIÓN DE CATALOGOS DE PROVEEDORES.");
+            LOGGER.error("ERROR EN RECUPERACIÓN DE CATALOGOS DE PROVEEDORES.", ex);
         }
+    }
+
+    private void sendTopicToRules(JsonNode providersSettings, String uuid) {
+        LOGGER.info("inicia envio de mensaje para regla de negocio [uuid: {}]", uuid);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode requestRule = objectMapper.createObjectNode();
+        requestRule.putPOJO("uid", uuid);
+        List<ObjectNode> providerList = new ArrayList<>();
+        providersSettings.get("providers").forEach(provider -> {
+            ObjectNode pr = objectMapper.createObjectNode();
+            pr.putPOJO("name", provider.get("name").asText());
+            pr.putPOJO("type", provider.get("type").asText());
+            providerList.add(pr);
+        });
+        requestRule.putPOJO("provider", providerList);
+        kafkaSenderService.sendMessage(requestRule, "topic-rules");
+        LOGGER.info("finaliza envio de mensaje para regla de negocio [uuid: {}]", uuid);
     }
 
     private EProcessType defineProcessType(JsonNode message) {

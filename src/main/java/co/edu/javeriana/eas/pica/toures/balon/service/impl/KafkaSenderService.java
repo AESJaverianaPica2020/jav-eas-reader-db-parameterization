@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 public class KafkaSenderService {
 
@@ -18,9 +20,10 @@ public class KafkaSenderService {
 
     private KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void sendMessage(JsonNode message) {
+    public void sendMessage(JsonNode message, String customTopic) {
         LOGGER.info("INICIA PROCESO DE ENVIO DE MENSAJE A TOPICO [{}] CON MENSAJE [{}]", topicProducer, JsonUtility.getPlainJson(message));
-        kafkaTemplate.send(topicProducer, message);
+        String topic = Objects.isNull(customTopic) ? topicProducer : customTopic;
+        kafkaTemplate.send(topic, message);
         LOGGER.info("INICIA PROCESO DE ENVIO DE MENSAJE A TOPICO [{}]", topicProducer);
     }
 
